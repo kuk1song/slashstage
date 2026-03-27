@@ -23,6 +23,7 @@ build/
 vendor/
 *.test
 *.out
+coverage.out
 
 # Node (frontend)
 node_modules/

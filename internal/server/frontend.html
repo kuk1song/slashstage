@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SlashStage 🎸</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0e14; --bg2: #0d1219; --surface: #131a24; --surface2: #192231;
+            --border: #1e2d3d; --border-hover: #2a4a6b;
+            --text: #e2e8f0; --text-muted: #64748b; --text-dim: #475569;
+            --accent: #38bdf8; --accent2: #818cf8; --accent-glow: rgba(56,189,248,0.12);
+            --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+            --purple: #a78bfa; --cyan: #22d3ee; --orange: #fb923c;
+            --gradient-1: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            --gradient-2: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
+            --gradient-subtle: linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(129,140,248,0.08) 100%);
+        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 28px 32px; }
+
+        /* ── Header ── */
+        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo .emoji { font-size: 24px; -webkit-text-fill-color: initial; }
+        .actions { display: flex; gap: 10px; }
+
+        /* ── Buttons ── */
+        .btn { padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
+        .btn-primary { background: var(--gradient-1); color: #0a0e14; border: none; font-weight: 600; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(56,189,248,0.25); }
+
+        /* ── Navigation Bar (breadcrumb + back) ── */
+        .nav-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+        .back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 18px; transition: all 0.2s; flex-shrink: 0; }
+        .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+        .breadcrumb a { color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 500; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: var(--text-dim); font-size: 11px; }
+        .breadcrumb .current { color: var(--text); font-weight: 500; }
+
+        /* ── Stats ── */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 28px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-1); opacity: 0; transition: opacity 0.3s; }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-card h3 { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 8px; }
+        .stat-card .value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+        .stat-card .value.accent { color: var(--accent); }
+        .stat-card .value.green { color: var(--green); }
+        .stat-card .value.yellow { color: var(--yellow); }
+        .stat-card .value.purple { color: var(--purple); }
+
+        /* ── Search ── */
+        .search-bar { width: 100%; padding: 12px 18px 12px 42px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; margin-bottom: 28px; outline: none; transition: all 0.2s; }
+        .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .search-wrap { position: relative; }
+        .search-wrap::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
+
+        /* ── Project Cards (Grid) ── */
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+        .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+        .project-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradient-1); opacity: 0; transition: opacity 0.25s; }
+        .project-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .project-card:hover::before { opacity: 1; }
+        .project-card .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+        .project-card h2 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+        .project-card .session-count { background: var(--accent-glow); color: var(--accent); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .project-card .path { color: var(--text-dim); font-size: 11px; font-family: 'SF Mono', Monaco, Menlo, monospace; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .project-card .agents { display: flex; gap: 6px; flex-wrap: wrap; }
+        .agent-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--text-muted); font-weight: 500; }
+        .agent-tag .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+        /* ── Sessions Grid ── */
+        .sessions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+        .session-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; cursor: pointer; transition: all 0.2s; }
+        .session-card:hover { border-color: var(--border-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .session-card .session-title { font-size: 14px; font-weight: 500; margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .session-card .session-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-dim); margin-bottom: 12px; }
+        .session-card .session-meta span { display: flex; align-items: center; gap: 4px; }
+        .session-card .session-bottom { display: flex; gap: 16px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .session-card .mini-stat { font-size: 12px; color: var(--text-muted); }
+        .session-card .mini-stat strong { color: var(--accent); font-weight: 700; }
+
+        /* ── Messages View ── */
+        .messages-container { display: flex; flex-direction: column; gap: 10px; }
+        .message { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; position: relative; }
+        .message.user { border-left: 3px solid var(--accent); }
+        .message.assistant { border-left: 3px solid var(--green); }
+        .message.tool { border-left: 3px solid var(--yellow); }
+        .message .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
+        .message .msg-role { font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
+        .message .msg-role.user { color: var(--accent); }
+        .message .msg-role.assistant { color: var(--green); }
+        .message .msg-role.tool { color: var(--yellow); }
+        .message .msg-time { color: var(--text-dim); margin-left: auto; font-size: 11px; font-family: 'SF Mono', Monaco, Menlo, monospace; }
+        .message .msg-content { font-size: 13.5px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; color: var(--text); }
+        .message .msg-tool { font-size: 11px; color: var(--yellow); font-family: monospace; margin-bottom: 6px; padding: 4px 8px; background: rgba(251,191,36,0.08); border-radius: 4px; display: inline-block; }
+        .msg-order-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+        .msg-order-toggle .label { font-size: 12px; color: var(--text-dim); }
+        .msg-order-toggle button { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-weight: 500; }
+        .msg-order-toggle button.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+
+        /* ── Search Results ── */
+        .search-results { display: flex; flex-direction: column; gap: 10px; }
+        .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; cursor: pointer; transition: all 0.2s; }
+        .search-result:hover { border-color: var(--border-hover); }
+        .search-result .result-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; display: flex; gap: 10px; align-items: center; }
+        .search-result .result-content { font-size: 13px; line-height: 1.5; max-height: 80px; overflow: hidden; color: var(--text-muted); }
+
+        /* ── Loading & Empty ── */
+        .loading { text-align: center; padding: 60px; color: var(--text-dim); }
+        .loading .spinner { display: inline-block; width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty { text-align: center; padding: 60px; color: var(--text-dim); }
+        .empty p { margin-bottom: 16px; font-size: 14px; }
+
+        /* ── Section Title ── */
+        .section-title { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+        /* ── View transition ── */
+        .view { animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            header { flex-direction: column; gap: 14px; align-items: flex-start; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .projects-grid, .sessions-grid { grid-template-columns: 1fr; }
+            .message .msg-content { max-height: 300px; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 18px; }
+            .stat-card .value { font-size: 24px; }
+            .projects-grid, .sessions-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="emoji">🎸</span>
+                <h1>SlashStage</h1>
+            </div>
+            <div class="actions">
+                <button class="btn" onclick="scan()">⟳ Scan</button>
+                <button class="btn btn-primary" onclick="addProject()">+ Add Project</button>
+            </div>
+        </header>
+
+        <div id="nav-bar" class="nav-bar" style="display:none">
+            <button class="back-btn" id="back-btn" onclick="goBack()" title="Go back">←</button>
+            <div id="breadcrumb" class="breadcrumb"></div>
+        </div>
+
+        <div class="search-wrap" id="search-wrap">
+            <input class="search-bar" id="search-input" type="text" placeholder="Search across all sessions..." onkeyup="if(event.key==='Enter')search(this.value)">
+        </div>
+
+        <div id="main-content">
+            <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api';
+        let currentView = 'home';
+        let currentProject = null;
+        let projectsCache = [];
+        let messageOrder = 'desc'; // newest first by default
+
+        // ── Agent helpers ──
+        const agentColors = { 'cursor-ide': '#34d399', 'cursor-cli': '#22d3ee', 'claude-code': '#fb923c', 'codex-cli': '#a78bfa', 'gemini-cli': '#fbbf24', 'opencode': '#f87171', 'copilot-cli': '#38bdf8' };
+        const agentIcons = { 'cursor-ide': '▪', 'cursor-cli': '▫', 'claude-code': '◆', 'codex-cli': '◇', 'gemini-cli': '✦', 'opencode': '⬡', 'copilot-cli': '●' };
+        function agentDot(agent) { return '<span class="dot" style="background:' + (agentColors[agent] || '#64748b') + '"></span>'; }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+        // ── Format date/time ──
+        function formatFullDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const sec = String(d.getSeconds()).padStart(2, '0');
+            return y + '-' + m + '-' + day + ' ' + h + ':' + min + ':' + sec;
+        }
+        function formatShortDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        function formatTime(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ── Back button ──
+        function goBack() {
+            if (currentView === 'session' && currentProject) {
+                navigate('project', currentProject);
+            } else {
+                navigate('home');
+            }
+        }
+
+        // ── Navigation ──
+        function navigate(view, data) {
+            currentView = view;
+            const navBar = document.getElementById('nav-bar');
+            const main = document.getElementById('main-content');
+            const searchWrap = document.getElementById('search-wrap');
+
+            if (view === 'home') {
+                navBar.style.display = 'none';
+                searchWrap.style.display = '';
+                currentProject = null;
+                showHome(main);
+            } else if (view === 'project') {
+                currentProject = data;
+                navBar.style.display = 'flex';
+                document.getElementById('breadcrumb').innerHTML =
+                    '<a onclick="navigate(\'home\')">Projects</a>' +
+                    '<span class="sep">›</span>' +
+                    '<span class="current">' + esc(data.name) + '</span>';
+                searchWrap.style.display = '';
+                showProject(main, data);
+            } else if (view === 'session') {
+                navBar.style.display = 'flex';
+                let projLink = '';
+                if (currentProject) {
+                    projLink = '<a onclick="navigate(\'project\', currentProject)">' + esc(currentProject.name) + '</a><span class="sep">›</span>';
+                }
+                document.getElementById('breadcrumb').innerHTML =
+                    '<a onclick="navigate(\'home\')">Projects</a><span class="sep">›</span>' +
+                    projLink +
+                    '<span class="current">' + esc(data.title || 'Session') + '</span>';
+                searchWrap.style.display = 'none';
+                showSession(main, data);
+            } else if (view === 'search') {
+                navBar.style.display = 'flex';
+                document.getElementById('breadcrumb').innerHTML =
+                    '<a onclick="navigate(\'home\')">Projects</a><span class="sep">›</span>' +
+                    '<span class="current">Search: "' + esc(data.query) + '"</span>';
+                searchWrap.style.display = '';
+                showSearchResults(main, data);
+            }
+        }
+
+        // ── Home View ──
+        async function showHome(main) {
+            main.innerHTML = '<div class="view">' +
+                '<div class="stats" id="home-stats"></div>' +
+                '<div class="projects-grid" id="projects"><div class="loading"><div class="spinner"></div><p>Loading projects...</p></div></div>' +
+                '</div>';
+            await Promise.all([loadStats(), loadProjects()]);
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(API + '/stats');
+                const data = await res.json();
+                const el = document.getElementById('home-stats');
+                if (!el) return;
+                el.innerHTML =
+                    '<div class="stat-card"><h3>Projects</h3><div class="value accent">' + (data.total_projects || 0) + '</div></div>' +
+                    '<div class="stat-card"><h3>Sessions</h3><div class="value green">' + (data.total_sessions || 0) + '</div></div>' +
+                    '<div class="stat-card"><h3>Unassigned</h3><div class="value yellow">' + (data.unassigned_sessions || 0) + '</div></div>';
+            } catch(e) { console.error('loadStats:', e); }
+        }
+
+        async function loadProjects() {
+            try {
+                const res = await fetch(API + '/projects');
+                projectsCache = await res.json();
+                const container = document.getElementById('projects');
+                if (!container) return;
+
+                if (!projectsCache || projectsCache.length === 0) {
+                    container.innerHTML = '<div class="empty"><p>No projects found yet.</p><button class="btn btn-primary" onclick="scan()">⟳ Scan for sessions</button></div>';
+                    return;
+                }
+
+                projectsCache.sort((a, b) => (b.total_sessions || 0) - (a.total_sessions || 0));
+
+                container.innerHTML = projectsCache.map((p, idx) => {
+                    const agents = Object.entries(p.sessions_by_agent || {}).map(([agent, count]) =>
+                        '<span class="agent-tag">' + agentDot(agent) + ' ' + agent + '</span>'
+                    ).join('');
+                    const total = p.total_sessions || 0;
+
+                    return '<div class="project-card" onclick="navigate(\'project\', projectsCache[' + idx + '])">' +
+                        '<div class="card-header"><h2>' + esc(p.name) + '</h2><span class="session-count">' + total + ' session' + (total !== 1 ? 's' : '') + '</span></div>' +
+                        '<div class="path">' + esc(p.path) + '</div>' +
+                        '<div class="agents">' + (agents || '<span style="color:var(--text-dim);font-size:11px">No sessions</span>') + '</div>' +
+                        '</div>';
+                }).join('');
+            } catch(e) { console.error('loadProjects:', e); }
+        }
+
+        // ── Project View (Sessions) ──
+        async function showProject(main, project) {
+            main.innerHTML = '<div class="view">' +
+                '<div class="stats" id="proj-stats"></div>' +
+                '<div class="sessions-grid" id="sessions-list"><div class="loading"><div class="spinner"></div><p>Loading sessions...</p></div></div>' +
+                '</div>';
+
+            try {
+                const res = await fetch(API + '/projects/' + project.id + '/sessions');
+                const sessions = await res.json();
+                const list = document.getElementById('sessions-list');
+                const statsEl = document.getElementById('proj-stats');
+
+                const totalMsgs = (sessions || []).reduce((sum, s) => sum + (s.message_count || 0), 0);
+                const totalTools = (sessions || []).reduce((sum, s) => sum + (s.tool_calls || 0), 0);
+                statsEl.innerHTML =
+                    '<div class="stat-card"><h3>Sessions</h3><div class="value accent">' + (sessions ? sessions.length : 0) + '</div></div>' +
+                    '<div class="stat-card"><h3>Messages</h3><div class="value green">' + totalMsgs + '</div></div>' +
+                    '<div class="stat-card"><h3>Tool Calls</h3><div class="value yellow">' + totalTools + '</div></div>';
+
+                if (!sessions || sessions.length === 0) {
+                    list.innerHTML = '<div class="empty"><p>No sessions found for this project.</p></div>';
+                    return;
+                }
+
+                list.innerHTML = sessions.map(s => {
+                    const dateStr = formatShortDate(s.start_time);
+                    const timeStr = formatTime(s.start_time);
+                    const sJson = JSON.stringify({id: s.id, title: s.title || s.id}).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+                    return '<div class="session-card" onclick=\'navigate("session", ' + sJson + ')\'>' +
+                        '<div class="session-title">' + esc(s.title || s.id || 'Untitled') + '</div>' +
+                        '<div class="session-meta">' +
+                            '<span>' + agentDot(s.agent_type) + ' ' + esc(s.agent_type || '') + '</span>' +
+                            (dateStr ? '<span>📅 ' + dateStr + '</span>' : '') +
+                            (timeStr ? '<span>🕐 ' + timeStr + '</span>' : '') +
+                        '</div>' +
+                        '<div class="session-bottom">' +
+                            '<span class="mini-stat"><strong>' + (s.message_count || 0) + '</strong> msgs</span>' +
+                            '<span class="mini-stat"><strong>' + (s.tool_calls || 0) + '</strong> tools</span>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            } catch(e) {
+                console.error('showProject:', e);
+                main.innerHTML = '<div class="empty"><p>Error loading sessions.</p></div>';
+            }
+        }
+
+        // ── Session View (Messages) ──
+        async function showSession(main, sessionInfo) {
+            main.innerHTML = '<div class="view"><div class="loading"><div class="spinner"></div><p>Loading messages...</p></div></div>';
+
+            try {
+                const res = await fetch(API + '/sessions/' + sessionInfo.id + '/messages');
+                let messages = await res.json();
+
+                if (!messages || messages.length === 0) {
+                    main.innerHTML = '<div class="view"><div class="empty"><p>No messages in this session.</p></div></div>';
+                    return;
+                }
+
+                const userN = messages.filter(m => m.role === 'user').length;
+                const assistN = messages.filter(m => m.role === 'assistant').length;
+                const toolN = messages.filter(m => m.role === 'tool').length;
+
+                const statsHTML = '<div class="stats">' +
+                    '<div class="stat-card"><h3>Messages</h3><div class="value accent">' + messages.length + '</div></div>' +
+                    '<div class="stat-card"><h3>User</h3><div class="value">' + userN + '</div></div>' +
+                    '<div class="stat-card"><h3>Assistant</h3><div class="value green">' + assistN + '</div></div>' +
+                    '<div class="stat-card"><h3>Tool</h3><div class="value yellow">' + toolN + '</div></div>' +
+                    '</div>';
+
+                // Order toggle
+                const orderToggle = '<div class="msg-order-toggle">' +
+                    '<span class="label">Sort:</span>' +
+                    '<button onclick="setMsgOrder(\'desc\')" class="' + (messageOrder === 'desc' ? 'active' : '') + '">Newest first</button>' +
+                    '<button onclick="setMsgOrder(\'asc\')" class="' + (messageOrder === 'asc' ? 'active' : '') + '">Oldest first</button>' +
+                    '</div>';
+
+                // Apply order
+                if (messageOrder === 'desc') {
+                    messages = messages.slice().reverse();
+                }
+
+                const msgsHTML = messages.map(m => {
+                    const ts = formatFullDate(m.created_at);
+                    const toolInfo = m.tool_name ? '<div class="msg-tool">🔧 ' + esc(m.tool_name) + '</div>' : '';
+                    const content = esc((m.content || '').substring(0, 4000));
+
+                    return '<div class="message ' + (m.role || '') + '">' +
+                        '<div class="msg-header"><span class="msg-role ' + (m.role || '') + '">' + (m.role || 'unknown') + '</span><span class="msg-time">' + ts + '</span></div>' +
+                        toolInfo +
+                        '<div class="msg-content">' + content + '</div>' +
+                        '</div>';
+                }).join('');
+
+                main.innerHTML = '<div class="view">' + statsHTML + orderToggle + '<div class="messages-container">' + msgsHTML + '</div></div>';
+            } catch(e) {
+                console.error('showSession:', e);
+                main.innerHTML = '<div class="view"><div class="empty"><p>Error loading messages.</p></div></div>';
+            }
+        }
+
+        // Message order toggle
+        let lastSessionInfo = null;
+        const origShowSession = showSession;
+        showSession = async function(main, sessionInfo) {
+            lastSessionInfo = sessionInfo;
+            return origShowSession(main, sessionInfo);
+        };
+        function setMsgOrder(order) {
+            messageOrder = order;
+            if (lastSessionInfo) {
+                showSession(document.getElementById('main-content'), lastSessionInfo);
+            }
+        }
+
+        // ── Search ──
+        async function search(query) {
+            if (!query || !query.trim()) return;
+            navigate('search', { query: query.trim() });
+        }
+
+        async function showSearchResults(main, data) {
+            main.innerHTML = '<div class="view"><div class="loading"><div class="spinner"></div><p>Searching...</p></div></div>';
+            try {
+                const res = await fetch(API + '/search?q=' + encodeURIComponent(data.query) + '&limit=100');
+                const messages = await res.json();
+
+                if (!messages || messages.length === 0) {
+                    main.innerHTML = '<div class="view"><div class="empty"><p>No results for "' + esc(data.query) + '"</p></div></div>';
+                    return;
+                }
+
+                const resultsHTML = messages.map(m => {
+                    const preview = esc((m.content || '').substring(0, 300));
+                    const ts = formatShortDate(m.created_at);
+                    const sJson = JSON.stringify({id: m.session_id, title: m.session_id}).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+                    return '<div class="search-result" onclick=\'navigate("session", ' + sJson + ')\'>' +
+                        '<div class="result-meta"><span class="msg-role ' + (m.role||'') + '" style="font-size:11px;font-weight:700">' + esc(m.role || '') + '</span><span>' + ts + '</span><span style="color:var(--accent);font-family:monospace;font-size:10px">' + esc((m.session_id || '').substring(0, 12)) + '…</span></div>' +
+                        '<div class="result-content">' + preview + '</div>' +
+                        '</div>';
+                }).join('');
+
+                main.innerHTML = '<div class="view"><div class="section-title">' + messages.length + ' results for "' + esc(data.query) + '"</div><div class="search-results">' + resultsHTML + '</div></div>';
+            } catch(e) {
+                console.error('showSearchResults:', e);
+                main.innerHTML = '<div class="view"><div class="empty"><p>Search failed.</p></div></div>';
+            }
+        }
+
+        // ── Actions ──
+        async function scan() {
+            const main = document.getElementById('main-content');
+            main.innerHTML = '<div class="loading"><div class="spinner"></div><p>Scanning all IDEs for sessions...</p></div>';
+            try {
+                await fetch(API + '/scan', { method: 'POST' });
+                navigate('home');
+            } catch(e) {
+                console.error('scan:', e);
+                main.innerHTML = '<div class="empty"><p>Scan failed. Check server logs.</p></div>';
+            }
+        }
+
+        async function addProject() {
+            const name = prompt('Project name:');
+            if (!name) return;
+            const path = prompt('Project path (absolute):');
+            if (!path) return;
+            await fetch(API + '/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, path })
+            });
+            navigate('home');
+        }
+
+        // ── Init ──
+        navigate('home');
+    </script>
+</body>
+</html>

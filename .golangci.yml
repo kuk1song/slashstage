@@ -1,0 +1,81 @@
+# golangci-lint configuration for SlashStage
+# Docs: https://golangci-lint.run/usage/configuration/
+
+version: "2"
+
+run:
+  timeout: 3m
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errcheck
+    - errorlint
+    - gocritic
+    - gofmt
+    - goimports
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nilerr
+    - prealloc
+    - revive
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - performance
+      - style
+  goimports:
+    local-prefixes: github.com/kuk1song/slashstage
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # Too noisy for MVP
+  revive:
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: exported
+      - name: increment-decrement
+      - name: receiver-naming
+      - name: var-naming
+  staticcheck:
+    checks:
+      - all
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 5
+
+  exclude-rules:
+    # Ignore unused parameter warnings in test files
+    - path: _test\.go
+      linters:
+        - unparam
+        - gosec
+
+    # Allow embed blank imports
+    - linters:
+        - revive
+      text: "blank-imports"
+      path: "db\\.go|server\\.go"
+
+    # Allow magic numbers in tests
+    - path: _test\.go
+      linters:
+        - gocritic
+      text: "hugeParam"

@@ -1,0 +1,26 @@
+version: 2
+
+updates:
+  # Go module dependencies
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    reviewers: ["kuk1song"]
+    labels: ["dependencies", "go"]
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  # GitHub Actions — keeps pinned SHAs up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    reviewers: ["kuk1song"]
+    labels: ["dependencies", "ci"]
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci(deps)"
