@@ -453,46 +453,82 @@ func extractCursorTitle(meta *cursorSessionMeta) string {
 
 // extractCursorWorkspace extracts the workspace path from file URIs in the session.
 // Cursor stores file URIs in allAttachedFileCodeChunksUris, codeBlockData, and originalFileStates.
+//
+// Strategy: collect ALL file paths from all sources, find git roots, and pick
+// the most common valid workspace. This avoids the old bug of using the FIRST
+// random file URI (which might point to a Cursor config dir).
 func extractCursorWorkspace(meta *cursorSessionMeta) string {
-	// Try allAttachedFileCodeChunksUris first
+	// Step 1: Collect all file paths from all sources
+	var allPaths []string
+
 	for _, uri := range meta.FileURIs {
-		if path := fileURIToPath(uri); path != "" {
-			if root := FindGitRoot(filepath.Dir(path)); root != "" {
-				return root
-			}
-			// No git root, use the parent directory
-			return filepath.Dir(path)
+		if p := fileURIToPath(uri); p != "" {
+			allPaths = append(allPaths, filepath.Dir(p))
 		}
 	}
 
-	// Try codeBlockData keys (they are file URIs)
 	if len(meta.CodeBlockData) > 0 {
 		var codeBlocks map[string]json.RawMessage
 		if json.Unmarshal(meta.CodeBlockData, &codeBlocks) == nil {
 			for uri := range codeBlocks {
-				if path := fileURIToPath(uri); path != "" {
-					if root := FindGitRoot(filepath.Dir(path)); root != "" {
-						return root
-					}
-					return filepath.Dir(path)
+				if p := fileURIToPath(uri); p != "" {
+					allPaths = append(allPaths, filepath.Dir(p))
 				}
 			}
 		}
 	}
 
-	// Try originalFileStates keys
 	if len(meta.OriginalFiles) > 0 {
 		var origFiles map[string]json.RawMessage
 		if json.Unmarshal(meta.OriginalFiles, &origFiles) == nil {
 			for uri := range origFiles {
-				if path := fileURIToPath(uri); path != "" {
-					if root := FindGitRoot(filepath.Dir(path)); root != "" {
-						return root
-					}
-					return filepath.Dir(path)
+				if p := fileURIToPath(uri); p != "" {
+					allPaths = append(allPaths, filepath.Dir(p))
 				}
 			}
 		}
+	}
+
+	if len(allPaths) == 0 {
+		return ""
+	}
+
+	// Step 2: Find git roots for all paths, count occurrences
+	gitRootCount := make(map[string]int)
+	dirCount := make(map[string]int)
+
+	for _, p := range allPaths {
+		if root := FindGitRoot(p); root != "" && IsValidWorkspace(root) {
+			gitRootCount[root]++
+		} else if IsValidWorkspace(p) {
+			dirCount[p]++
+		}
+	}
+
+	// Step 3: Pick the most frequent git root (most files come from this project)
+	if len(gitRootCount) > 0 {
+		var bestRoot string
+		var bestCount int
+		for root, count := range gitRootCount {
+			if count > bestCount {
+				bestRoot = root
+				bestCount = count
+			}
+		}
+		return bestRoot
+	}
+
+	// Step 4: Fallback to most frequent valid directory
+	if len(dirCount) > 0 {
+		var bestDir string
+		var bestCount int
+		for dir, count := range dirCount {
+			if count > bestCount {
+				bestDir = dir
+				bestCount = count
+			}
+		}
+		return bestDir
 	}
 
 	return ""

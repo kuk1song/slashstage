@@ -234,14 +234,26 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Auto-discover new projects if none exist
-	if len(projects) == 0 {
-		candidates := parser.DiscoverProjects(results)
-		for _, c := range candidates {
-			p, err := s.db.CreateProject(c.Name, c.Path, "", "")
-			if err == nil {
-				projects = append(projects, *p)
-			}
+	// Build a set of known project paths for fast lookup
+	knownPaths := make(map[string]bool)
+	for _, p := range projects {
+		knownPaths[p.Path] = true
+	}
+
+	// Discover new projects from sessions — always check for new workspaces,
+	// not just on first run. This ensures subsequent scans pick up new projects.
+	candidates := parser.DiscoverProjects(results)
+	newProjects := 0
+	for _, c := range candidates {
+		if knownPaths[c.Path] {
+			continue // Already exists
+		}
+		p, err := s.db.CreateProject(c.Name, c.Path, "", "")
+		if err == nil {
+			projects = append(projects, *p)
+			knownPaths[c.Path] = true
+			newProjects++
+			slog.Info("discovered new project", "name", c.Name, "path", c.Path)
 		}
 	}
 
@@ -269,12 +281,12 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		sessionCount++
 	}
 
-	slog.Info("scan complete", "sessions", sessionCount, "projects", len(projects))
+	slog.Info("scan complete", "sessions", sessionCount, "projects", len(projects), "new_projects", newProjects)
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"sessions_found":    sessionCount,
-		"projects_found":    len(projects),
-		"new_projects":      len(projects),
+		"sessions_found": sessionCount,
+		"projects_found": len(projects),
+		"new_projects":   newProjects,
 	})
 }
 

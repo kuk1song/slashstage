@@ -62,6 +62,7 @@ func ParseAll() ([]model.ParseResult, error) {
 
 // DiscoverProjects extracts unique project paths from parsed sessions.
 // Groups sessions by workspace path and returns project candidates.
+// Invalid workspace paths (IDE config dirs, temp dirs, etc.) are filtered out.
 func DiscoverProjects(results []model.ParseResult) []ProjectCandidate {
 	// Group by workspace path
 	groups := make(map[string]*ProjectCandidate)
@@ -69,6 +70,13 @@ func DiscoverProjects(results []model.ParseResult) []ProjectCandidate {
 	for _, r := range results {
 		ws := r.Session.Workspace
 		if ws == "" {
+			continue
+		}
+
+		// Skip invalid workspace paths (IDE config dirs, etc.)
+		if !IsValidWorkspace(ws) {
+			slog.Debug("skipping invalid workspace for project discovery",
+				"workspace", ws, "session", r.Session.ID)
 			continue
 		}
 
