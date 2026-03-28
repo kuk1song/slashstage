@@ -1,484 +1,684 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SlashStage 🎸</title>
+    <title>SlashStage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ═══════════════════════════════════════════
+           SlashStage — Console Design System
+           Inspired by Linear / Vercel / Raycast
+           ═══════════════════════════════════════════ */
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
-            --bg: #0a0e14; --bg2: #0d1219; --surface: #131a24; --surface2: #192231;
-            --border: #1e2d3d; --border-hover: #2a4a6b;
-            --text: #e2e8f0; --text-muted: #64748b; --text-dim: #475569;
-            --accent: #38bdf8; --accent2: #818cf8; --accent-glow: rgba(56,189,248,0.12);
-            --green: #34d399; --yellow: #fbbf24; --red: #f87171;
-            --purple: #a78bfa; --cyan: #22d3ee; --orange: #fb923c;
-            --gradient-1: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-            --gradient-2: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
-            --gradient-subtle: linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(129,140,248,0.08) 100%);
+            /* Background layers — subtle depth */
+            --bg-base: #0d1117;
+            --bg-raised: #161b22;
+            --bg-overlay: #1c2128;
+            --bg-hover: #21262d;
+
+            /* Text hierarchy */
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --text-tertiary: #484f58;
+            --text-link: #58a6ff;
+
+            /* Accent palette — restrained and warm */
+            --accent: #58a6ff;
+            --accent-subtle: rgba(88, 166, 255, 0.10);
+            --green: #3fb950;
+            --green-subtle: rgba(63, 185, 80, 0.10);
+            --yellow: #d29922;
+            --yellow-subtle: rgba(210, 153, 34, 0.10);
+            --purple: #a371f7;
+            --purple-subtle: rgba(163, 113, 247, 0.10);
+            --red: #f85149;
+            --orange: #d18616;
+
+            /* Elevation — shadows instead of borders */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 3px 12px rgba(0,0,0,0.35);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-hover: 0 6px 20px rgba(0,0,0,0.45);
+
+            /* Border — minimal use */
+            --border-default: #30363d;
+            --border-muted: #21262d;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-        .container { max-width: 1280px; margin: 0 auto; padding: 28px 32px; }
 
-        /* ── Header ── */
-        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-        .logo { display: flex; align-items: center; gap: 10px; }
-        .logo h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo .emoji { font-size: 24px; -webkit-text-fill-color: initial; }
-        .actions { display: flex; gap: 10px; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* ── Buttons ── */
-        .btn { padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
-        .btn-primary { background: var(--gradient-1); color: #0a0e14; border: none; font-weight: 600; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(56,189,248,0.25); }
+        .app { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-        /* ── Navigation Bar (breadcrumb + back) ── */
-        .nav-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-        .back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 18px; transition: all 0.2s; flex-shrink: 0; }
-        .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
-        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
-        .breadcrumb a { color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 500; }
-        .breadcrumb a:hover { text-decoration: underline; }
-        .breadcrumb .sep { color: var(--text-dim); font-size: 11px; }
-        .breadcrumb .current { color: var(--text); font-weight: 500; }
+        /* ─── Header ─── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-muted);
+            margin: 0 -24px;
+            padding: 0 24px;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .brand {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; font-weight: 700; color: var(--text-primary);
+            text-decoration: none; cursor: pointer; letter-spacing: -0.3px;
+        }
+        .brand:hover { color: var(--accent); }
+        .brand svg { width: 20px; height: 20px; }
 
-        /* ── Stats ── */
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 28px; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden; }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-1); opacity: 0; transition: opacity 0.3s; }
-        .stat-card:hover::before { opacity: 1; }
-        .stat-card h3 { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 8px; }
-        .stat-card .value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
-        .stat-card .value.accent { color: var(--accent); }
-        .stat-card .value.green { color: var(--green); }
-        .stat-card .value.yellow { color: var(--yellow); }
-        .stat-card .value.purple { color: var(--purple); }
+        /* Breadcrumb (inline in header) */
+        .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-tertiary); }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { color: var(--text-primary); }
+        .breadcrumb .sep { font-size: 11px; }
+        .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
 
-        /* ── Search ── */
-        .search-bar { width: 100%; padding: 12px 18px 12px 42px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; margin-bottom: 28px; outline: none; transition: all 0.2s; }
-        .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+
+        /* ─── Buttons ─── */
+        .btn {
+            height: 32px; padding: 0 12px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default); background: var(--bg-raised);
+            color: var(--text-secondary); cursor: pointer;
+            font-size: 12px; font-weight: 500; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 5px;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+        .btn:hover { color: var(--text-primary); border-color: var(--text-tertiary); background: var(--bg-overlay); }
+        .btn-accent {
+            background: var(--accent); border-color: var(--accent);
+            color: #fff; font-weight: 600;
+        }
+        .btn-accent:hover { opacity: 0.92; background: #4c94e8; border-color: #4c94e8; }
+
+        /* ─── Main Content ─── */
+        .main { padding: 24px 0 48px; }
+
+        /* ─── Stats Bar (compact, not cards) ─── */
+        .stats-bar {
+            display: flex; align-items: center; gap: 24px;
+            padding: 12px 0; margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-muted);
+            font-size: 13px;
+        }
+        .stat-item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+        .stat-item .stat-num {
+            font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums;
+        }
+        .stat-item .stat-num.blue { color: var(--accent); }
+        .stat-item .stat-num.green { color: var(--green); }
+        .stat-item .stat-num.dim { color: var(--text-tertiary); }
+        .stat-item .stat-label { color: var(--text-tertiary); font-size: 12px; }
+
+        /* ─── Search ─── */
+        .search-container { margin-bottom: 20px; }
+        .search-input {
+            width: 100%; height: 36px;
+            padding: 0 12px 0 34px;
+            background: var(--bg-raised); border: 1px solid var(--border-muted);
+            border-radius: var(--radius-sm); color: var(--text-primary);
+            font-size: 13px; font-family: inherit; outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-subtle); }
+        .search-input::placeholder { color: var(--text-tertiary); }
         .search-wrap { position: relative; }
-        .search-wrap::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
-
-        /* ── Project Cards (Grid) ── */
-        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-        .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
-        .project-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradient-1); opacity: 0; transition: opacity 0.25s; }
-        .project-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-        .project-card:hover::before { opacity: 1; }
-        .project-card .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
-        .project-card h2 { font-size: 16px; font-weight: 600; line-height: 1.3; }
-        .project-card .session-count { background: var(--accent-glow); color: var(--accent); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-        .project-card .path { color: var(--text-dim); font-size: 11px; font-family: 'SF Mono', Monaco, Menlo, monospace; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .project-card .agents { display: flex; gap: 6px; flex-wrap: wrap; }
-        .agent-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--text-muted); font-weight: 500; }
-        .agent-tag .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-
-        /* ── Sessions Grid ── */
-        .sessions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
-        .session-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; cursor: pointer; transition: all 0.2s; }
-        .session-card:hover { border-color: var(--border-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-        .session-card .session-title { font-size: 14px; font-weight: 500; margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .session-card .session-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-dim); margin-bottom: 12px; }
-        .session-card .session-meta span { display: flex; align-items: center; gap: 4px; }
-        .session-card .session-bottom { display: flex; gap: 16px; padding-top: 10px; border-top: 1px solid var(--border); }
-        .session-card .mini-stat { font-size: 12px; color: var(--text-muted); }
-        .session-card .mini-stat strong { color: var(--accent); font-weight: 700; }
-
-        /* ── Messages View ── */
-        .messages-container { display: flex; flex-direction: column; gap: 10px; }
-        .message { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; position: relative; }
-        .message.user { border-left: 3px solid var(--accent); }
-        .message.assistant { border-left: 3px solid var(--green); }
-        .message.tool { border-left: 3px solid var(--yellow); }
-        .message .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
-        .message .msg-role { font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
-        .message .msg-role.user { color: var(--accent); }
-        .message .msg-role.assistant { color: var(--green); }
-        .message .msg-role.tool { color: var(--yellow); }
-        .message .msg-time { color: var(--text-dim); margin-left: auto; font-size: 11px; font-family: 'SF Mono', Monaco, Menlo, monospace; }
-        .message .msg-content { font-size: 13.5px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; color: var(--text); }
-        .message .msg-tool { font-size: 11px; color: var(--yellow); font-family: monospace; margin-bottom: 6px; padding: 4px 8px; background: rgba(251,191,36,0.08); border-radius: 4px; display: inline-block; }
-        .msg-order-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-        .msg-order-toggle .label { font-size: 12px; color: var(--text-dim); }
-        .msg-order-toggle button { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-weight: 500; }
-        .msg-order-toggle button.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
-
-        /* ── Search Results ── */
-        .search-results { display: flex; flex-direction: column; gap: 10px; }
-        .search-result { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; cursor: pointer; transition: all 0.2s; }
-        .search-result:hover { border-color: var(--border-hover); }
-        .search-result .result-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; display: flex; gap: 10px; align-items: center; }
-        .search-result .result-content { font-size: 13px; line-height: 1.5; max-height: 80px; overflow: hidden; color: var(--text-muted); }
-
-        /* ── Loading & Empty ── */
-        .loading { text-align: center; padding: 60px; color: var(--text-dim); }
-        .loading .spinner { display: inline-block; width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .empty { text-align: center; padding: 60px; color: var(--text-dim); }
-        .empty p { margin-bottom: 16px; font-size: 14px; }
-
-        /* ── Section Title ── */
-        .section-title { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-
-        /* ── Scrollbar ── */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
-        /* ── View transition ── */
-        .view { animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* ── Responsive ── */
-        @media (max-width: 768px) {
-            .container { padding: 16px; }
-            header { flex-direction: column; gap: 14px; align-items: flex-start; }
-            .stats { grid-template-columns: repeat(2, 1fr); }
-            .projects-grid, .sessions-grid { grid-template-columns: 1fr; }
-            .message .msg-content { max-height: 300px; }
+        .search-icon {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            color: var(--text-tertiary); font-size: 13px; pointer-events: none;
         }
-        @media (max-width: 480px) {
-            h1 { font-size: 18px; }
-            .stat-card .value { font-size: 24px; }
-            .projects-grid, .sessions-grid { grid-template-columns: 1fr; }
+
+        /* ─── Section Header ─── */
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-count {
+            font-size: 11px; font-weight: 500;
+            color: var(--text-tertiary); background: var(--bg-overlay);
+            padding: 2px 8px; border-radius: 10px;
+        }
+
+        /* ─── Project Cards ─── */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 12px;
+        }
+        .project-card {
+            background: var(--bg-raised);
+            border: 1px solid var(--border-muted);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, box-shadow 0.2s;
+        }
+        .project-card:hover {
+            background: var(--bg-overlay);
+            border-color: var(--border-default);
+            box-shadow: var(--shadow-md);
+        }
+        .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+        .card-name {
+            font-size: 14px; font-weight: 600; color: var(--text-primary);
+            line-height: 1.3; flex: 1; min-width: 0;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .card-badge {
+            font-size: 11px; font-weight: 600; padding: 2px 8px;
+            border-radius: 10px; white-space: nowrap; flex-shrink: 0; margin-left: 10px;
+        }
+        .card-badge.multi { background: var(--accent-subtle); color: var(--accent); }
+        .card-badge.single { background: var(--bg-overlay); color: var(--text-secondary); }
+        .card-path {
+            font-size: 11px; color: var(--text-tertiary);
+            font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 10px;
+        }
+        .card-agents { display: flex; gap: 6px; flex-wrap: wrap; }
+        .agent-pill {
+            font-size: 11px; color: var(--text-secondary);
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .agent-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+        /* ─── Session Cards ─── */
+        .session-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 10px;
+        }
+        .session-card {
+            background: var(--bg-raised);
+            border: 1px solid var(--border-muted);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, box-shadow 0.2s;
+        }
+        .session-card:hover {
+            background: var(--bg-overlay);
+            border-color: var(--border-default);
+            box-shadow: var(--shadow-md);
+        }
+        .session-title {
+            font-size: 13px; font-weight: 500; color: var(--text-primary);
+            margin-bottom: 8px; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .session-meta {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 11px; color: var(--text-tertiary);
+        }
+        .session-meta .agent-pill { font-size: 11px; }
+        .session-stats {
+            display: flex; gap: 12px; margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid var(--border-muted);
+            font-size: 12px; color: var(--text-tertiary);
+        }
+        .session-stats strong { color: var(--text-secondary); font-weight: 600; }
+
+        /* ─── Messages ─── */
+        .messages-list { display: flex; flex-direction: column; gap: 6px; }
+        .msg-item {
+            background: var(--bg-raised);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            border-left: 2px solid transparent;
+        }
+        .msg-item.user { border-left-color: var(--accent); }
+        .msg-item.assistant { border-left-color: var(--green); }
+        .msg-item.tool { border-left-color: var(--yellow); }
+        .msg-head {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 6px; font-size: 11px;
+        }
+        .msg-role-tag {
+            font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.3px; font-size: 10px;
+            padding: 1px 6px; border-radius: 3px;
+        }
+        .msg-role-tag.user { color: var(--accent); background: var(--accent-subtle); }
+        .msg-role-tag.assistant { color: var(--green); background: var(--green-subtle); }
+        .msg-role-tag.tool { color: var(--yellow); background: var(--yellow-subtle); }
+        .msg-time { color: var(--text-tertiary); margin-left: auto; font-size: 11px; font-variant-numeric: tabular-nums; }
+        .msg-tool-name {
+            font-size: 11px; color: var(--yellow);
+            font-family: monospace; margin-bottom: 4px;
+        }
+        .msg-body {
+            font-size: 13px; line-height: 1.6; color: var(--text-secondary);
+            white-space: pre-wrap; word-break: break-word;
+            max-height: 400px; overflow-y: auto;
+        }
+
+        /* Sort toggle */
+        .sort-bar {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px; font-size: 12px; color: var(--text-tertiary);
+        }
+        .sort-btn {
+            font-size: 11px; padding: 3px 8px; border-radius: 4px;
+            border: 1px solid var(--border-muted); background: transparent;
+            color: var(--text-tertiary); cursor: pointer; font-family: inherit;
+            transition: all 0.15s;
+        }
+        .sort-btn:hover { color: var(--text-secondary); border-color: var(--border-default); }
+        .sort-btn.on { color: var(--accent); background: var(--accent-subtle); border-color: transparent; }
+
+        /* ─── Search Results ─── */
+        .results-list { display: flex; flex-direction: column; gap: 8px; }
+        .result-item {
+            background: var(--bg-raised); border: 1px solid var(--border-muted);
+            border-radius: var(--radius-sm); padding: 12px 14px;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+        }
+        .result-item:hover { background: var(--bg-overlay); border-color: var(--border-default); }
+        .result-meta { font-size: 11px; color: var(--text-tertiary); display: flex; gap: 8px; margin-bottom: 6px; }
+        .result-content { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; max-height: 60px; overflow: hidden; }
+
+        /* ─── Loading / Empty ─── */
+        .loading-state { text-align: center; padding: 48px 0; color: var(--text-tertiary); }
+        .spinner {
+            width: 20px; height: 20px; margin: 0 auto 12px;
+            border: 2px solid var(--border-default); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state {
+            text-align: center; padding: 48px 0; color: var(--text-tertiary);
+        }
+        .empty-state p { margin-bottom: 12px; font-size: 13px; }
+
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+
+        /* ─── View transition ─── */
+        .view { animation: viewIn 0.18s ease-out; }
+        @keyframes viewIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .app { padding: 0 16px; }
+            .header { margin: 0 -16px; padding: 0 16px; }
+            .project-grid, .session-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-wrap: wrap; gap: 14px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <span class="emoji">🎸</span>
-                <h1>SlashStage</h1>
+    <div class="app">
+        <div class="header">
+            <div class="header-left">
+                <a class="brand" onclick="navigateTo('home')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                    SlashStage
+                </a>
+                <div id="breadcrumb" class="breadcrumb"></div>
             </div>
-            <div class="actions">
-                <button class="btn" onclick="scan()">⟳ Scan</button>
-                <button class="btn btn-primary" onclick="addProject()">+ Add Project</button>
+            <div class="header-right">
+                <button class="btn" onclick="doScan()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Scan
+                </button>
+                <button class="btn btn-accent" onclick="addProject()">+ New</button>
             </div>
-        </header>
-
-        <div id="nav-bar" class="nav-bar" style="display:none">
-            <button class="back-btn" id="back-btn" onclick="goBack()" title="Go back">←</button>
-            <div id="breadcrumb" class="breadcrumb"></div>
         </div>
 
-        <div class="search-wrap" id="search-wrap">
-            <input class="search-bar" id="search-input" type="text" placeholder="Search across all sessions..." onkeyup="if(event.key==='Enter')search(this.value)">
-        </div>
-
-        <div id="main-content">
-            <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
-        </div>
+        <div class="main" id="main"></div>
     </div>
 
     <script>
         const API = '/api';
-        let currentView = 'home';
-        let currentProject = null;
         let projectsCache = [];
-        let messageOrder = 'desc'; // newest first by default
+        let messageOrder = 'desc';
+        let lastSessionInfo = null;
 
-        // ── Agent helpers ──
-        const agentColors = { 'cursor-ide': '#34d399', 'cursor-cli': '#22d3ee', 'claude-code': '#fb923c', 'codex-cli': '#a78bfa', 'gemini-cli': '#fbbf24', 'opencode': '#f87171', 'copilot-cli': '#38bdf8' };
-        const agentIcons = { 'cursor-ide': '▪', 'cursor-cli': '▫', 'claude-code': '◆', 'codex-cli': '◇', 'gemini-cli': '✦', 'opencode': '⬡', 'copilot-cli': '●' };
-        function agentDot(agent) { return '<span class="dot" style="background:' + (agentColors[agent] || '#64748b') + '"></span>'; }
-        function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+        // ── Agent config ──
+        const agentColor = { 'cursor-ide':'#3fb950','cursor-cli':'#58a6ff','claude-code':'#d18616','codex-cli':'#a371f7','gemini-cli':'#d29922','opencode':'#f85149','copilot-cli':'#58a6ff' };
 
-        // ── Format date/time ──
-        function formatFullDate(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return '';
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const h = String(d.getHours()).padStart(2, '0');
-            const min = String(d.getMinutes()).padStart(2, '0');
-            const sec = String(d.getSeconds()).padStart(2, '0');
-            return y + '-' + m + '-' + day + ' ' + h + ':' + min + ':' + sec;
+        function dot(agent) { return '<span class="agent-dot" style="background:' + (agentColor[agent]||'#484f58') + '"></span>'; }
+        function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+        // ── Date formatting ──
+        function fmtDate(s) {
+            if (!s) return '';
+            const d = new Date(s);
+            if (isNaN(d)) return '';
+            return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
         }
-        function formatShortDate(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return '';
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        function fmtShort(s) {
+            if (!s) return '';
+            const d = new Date(s);
+            if (isNaN(d)) return '';
+            return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
         }
-        function formatTime(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return '';
-            return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        function p(n) { return String(n).padStart(2,'0'); }
+
+        // ══════════════════════════════════════
+        // ── History API Navigation ──
+        // ══════════════════════════════════════
+        function navigateTo(view, data) {
+            const state = { view, data };
+            const hash = hashFor(view, data);
+            history.pushState(state, '', hash);
+            render(view, data);
         }
 
-        // ── Back button ──
-        function goBack() {
-            if (currentView === 'session' && currentProject) {
-                navigate('project', currentProject);
+        // Replace current state (for initial load, don't push)
+        function navigateReplace(view, data) {
+            const state = { view, data };
+            const hash = hashFor(view, data);
+            history.replaceState(state, '', hash);
+            render(view, data);
+        }
+
+        function hashFor(view, data) {
+            if (view === 'home') return '#/';
+            if (view === 'project' && data) return '#/p/' + data.id;
+            if (view === 'session' && data) return '#/s/' + data.id;
+            if (view === 'search' && data) return '#/search?q=' + encodeURIComponent(data.query);
+            return '#/';
+        }
+
+        // Browser back/forward
+        window.addEventListener('popstate', function(e) {
+            if (e.state) {
+                render(e.state.view, e.state.data);
             } else {
-                navigate('home');
+                render('home');
             }
-        }
+        });
 
-        // ── Navigation ──
-        function navigate(view, data) {
-            currentView = view;
-            const navBar = document.getElementById('nav-bar');
-            const main = document.getElementById('main-content');
-            const searchWrap = document.getElementById('search-wrap');
+        // ── Render dispatcher ──
+        function render(view, data) {
+            const main = document.getElementById('main');
+            const bc = document.getElementById('breadcrumb');
 
             if (view === 'home') {
-                navBar.style.display = 'none';
-                searchWrap.style.display = '';
-                currentProject = null;
-                showHome(main);
+                bc.innerHTML = '';
+                renderHome(main);
             } else if (view === 'project') {
-                currentProject = data;
-                navBar.style.display = 'flex';
-                document.getElementById('breadcrumb').innerHTML =
-                    '<a onclick="navigate(\'home\')">Projects</a>' +
-                    '<span class="sep">›</span>' +
-                    '<span class="current">' + esc(data.name) + '</span>';
-                searchWrap.style.display = '';
-                showProject(main, data);
+                bc.innerHTML = '<span class="sep">/</span><a onclick="navigateTo(\'home\')">Projects</a><span class="sep">/</span><span class="current">' + esc(data.name) + '</span>';
+                renderProject(main, data);
             } else if (view === 'session') {
-                navBar.style.display = 'flex';
-                let projLink = '';
-                if (currentProject) {
-                    projLink = '<a onclick="navigate(\'project\', currentProject)">' + esc(currentProject.name) + '</a><span class="sep">›</span>';
+                let projPart = '';
+                if (data._projectName) {
+                    projPart = '<span class="sep">/</span><a onclick="navigateTo(\'home\')">Projects</a><span class="sep">/</span>' +
+                        (data._projectId ? '<a onclick="goToProject(' + data._projectId + ')">' + esc(data._projectName) + '</a>' : '<span>' + esc(data._projectName) + '</span>') +
+                        '<span class="sep">/</span>';
+                } else {
+                    projPart = '<span class="sep">/</span><a onclick="navigateTo(\'home\')">Projects</a><span class="sep">/</span>';
                 }
-                document.getElementById('breadcrumb').innerHTML =
-                    '<a onclick="navigate(\'home\')">Projects</a><span class="sep">›</span>' +
-                    projLink +
-                    '<span class="current">' + esc(data.title || 'Session') + '</span>';
-                searchWrap.style.display = 'none';
-                showSession(main, data);
+                bc.innerHTML = projPart + '<span class="current">' + esc(data.title || 'Session') + '</span>';
+                renderSession(main, data);
             } else if (view === 'search') {
-                navBar.style.display = 'flex';
-                document.getElementById('breadcrumb').innerHTML =
-                    '<a onclick="navigate(\'home\')">Projects</a><span class="sep">›</span>' +
-                    '<span class="current">Search: "' + esc(data.query) + '"</span>';
-                searchWrap.style.display = '';
-                showSearchResults(main, data);
+                bc.innerHTML = '<span class="sep">/</span><a onclick="navigateTo(\'home\')">Projects</a><span class="sep">/</span><span class="current">Search</span>';
+                renderSearch(main, data);
             }
         }
 
-        // ── Home View ──
-        async function showHome(main) {
-            main.innerHTML = '<div class="view">' +
-                '<div class="stats" id="home-stats"></div>' +
-                '<div class="projects-grid" id="projects"><div class="loading"><div class="spinner"></div><p>Loading projects...</p></div></div>' +
-                '</div>';
-            await Promise.all([loadStats(), loadProjects()]);
+        function goToProject(pid) {
+            const proj = projectsCache.find(p => p.id === pid);
+            if (proj) navigateTo('project', proj);
         }
 
-        async function loadStats() {
+        // ══════════════════════════════════════
+        // ── Home View ──
+        // ══════════════════════════════════════
+        async function renderHome(el) {
+            el.innerHTML = '<div class="view">' +
+                '<div class="stats-bar" id="hstats"></div>' +
+                '<div class="search-container"><div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="search-input" type="text" placeholder="Search sessions and messages..." onkeyup="if(event.key===\'Enter\')doSearch(this.value)"></div></div>' +
+                '<div class="section-header"><div class="section-title">Projects <span class="section-count" id="proj-count">…</span></div></div>' +
+                '<div class="project-grid" id="pgrid"><div class="loading-state"><div class="spinner"></div><p>Loading…</p></div></div>' +
+                '</div>';
+
+            await Promise.all([loadHomeStats(), loadProjects()]);
+        }
+
+        async function loadHomeStats() {
             try {
-                const res = await fetch(API + '/stats');
-                const data = await res.json();
-                const el = document.getElementById('home-stats');
+                const r = await fetch(API + '/stats');
+                const d = await r.json();
+                const el = document.getElementById('hstats');
                 if (!el) return;
                 el.innerHTML =
-                    '<div class="stat-card"><h3>Projects</h3><div class="value accent">' + (data.total_projects || 0) + '</div></div>' +
-                    '<div class="stat-card"><h3>Sessions</h3><div class="value green">' + (data.total_sessions || 0) + '</div></div>' +
-                    '<div class="stat-card"><h3>Unassigned</h3><div class="value yellow">' + (data.unassigned_sessions || 0) + '</div></div>';
-            } catch(e) { console.error('loadStats:', e); }
+                    '<div class="stat-item"><span class="stat-num blue">' + (d.total_projects||0) + '</span><span class="stat-label">projects</span></div>' +
+                    '<div class="stat-item"><span class="stat-num green">' + (d.total_sessions||0) + '</span><span class="stat-label">sessions</span></div>' +
+                    '<div class="stat-item"><span class="stat-num dim">' + (d.unassigned_sessions||0) + '</span><span class="stat-label">unlinked</span></div>';
+            } catch(e) { console.error(e); }
         }
 
         async function loadProjects() {
             try {
-                const res = await fetch(API + '/projects');
-                projectsCache = await res.json();
-                const container = document.getElementById('projects');
-                if (!container) return;
+                const r = await fetch(API + '/projects');
+                projectsCache = await r.json();
+                const grid = document.getElementById('pgrid');
+                const countEl = document.getElementById('proj-count');
+                if (!grid) return;
+                if (countEl) countEl.textContent = projectsCache.length;
 
                 if (!projectsCache || projectsCache.length === 0) {
-                    container.innerHTML = '<div class="empty"><p>No projects found yet.</p><button class="btn btn-primary" onclick="scan()">⟳ Scan for sessions</button></div>';
+                    grid.innerHTML = '<div class="empty-state"><p>No projects yet</p><button class="btn btn-accent" onclick="doScan()">Scan for sessions</button></div>';
                     return;
                 }
 
-                projectsCache.sort((a, b) => (b.total_sessions || 0) - (a.total_sessions || 0));
+                projectsCache.sort((a,b) => (b.total_sessions||0) - (a.total_sessions||0));
 
-                container.innerHTML = projectsCache.map((p, idx) => {
-                    const agents = Object.entries(p.sessions_by_agent || {}).map(([agent, count]) =>
-                        '<span class="agent-tag">' + agentDot(agent) + ' ' + agent + '</span>'
+                grid.innerHTML = projectsCache.map((proj, i) => {
+                    const agents = Object.keys(proj.sessions_by_agent||{}).map(a =>
+                        '<span class="agent-pill">' + dot(a) + ' ' + a + '</span>'
                     ).join('');
-                    const total = p.total_sessions || 0;
+                    const n = proj.total_sessions||0;
+                    const cls = n > 1 ? 'multi' : 'single';
 
-                    return '<div class="project-card" onclick="navigate(\'project\', projectsCache[' + idx + '])">' +
-                        '<div class="card-header"><h2>' + esc(p.name) + '</h2><span class="session-count">' + total + ' session' + (total !== 1 ? 's' : '') + '</span></div>' +
-                        '<div class="path">' + esc(p.path) + '</div>' +
-                        '<div class="agents">' + (agents || '<span style="color:var(--text-dim);font-size:11px">No sessions</span>') + '</div>' +
+                    return '<div class="project-card" onclick="navigateTo(\'project\', projectsCache[' + i + '])">' +
+                        '<div class="card-top">' +
+                            '<span class="card-name">' + esc(proj.name) + '</span>' +
+                            '<span class="card-badge ' + cls + '">' + n + '</span>' +
+                        '</div>' +
+                        '<div class="card-path">' + esc(proj.path) + '</div>' +
+                        '<div class="card-agents">' + agents + '</div>' +
                         '</div>';
                 }).join('');
-            } catch(e) { console.error('loadProjects:', e); }
+            } catch(e) { console.error(e); }
         }
 
-        // ── Project View (Sessions) ──
-        async function showProject(main, project) {
-            main.innerHTML = '<div class="view">' +
-                '<div class="stats" id="proj-stats"></div>' +
-                '<div class="sessions-grid" id="sessions-list"><div class="loading"><div class="spinner"></div><p>Loading sessions...</p></div></div>' +
+        // ══════════════════════════════════════
+        // ── Project View ──
+        // ══════════════════════════════════════
+        async function renderProject(el, project) {
+            el.innerHTML = '<div class="view">' +
+                '<div class="stats-bar" id="pstats"></div>' +
+                '<div class="section-header"><div class="section-title">Sessions</div></div>' +
+                '<div class="session-grid" id="sgrid"><div class="loading-state"><div class="spinner"></div><p>Loading…</p></div></div>' +
                 '</div>';
 
             try {
-                const res = await fetch(API + '/projects/' + project.id + '/sessions');
-                const sessions = await res.json();
-                const list = document.getElementById('sessions-list');
-                const statsEl = document.getElementById('proj-stats');
+                const r = await fetch(API + '/projects/' + project.id + '/sessions');
+                const sessions = await r.json();
+                const statsEl = document.getElementById('pstats');
+                const grid = document.getElementById('sgrid');
 
-                const totalMsgs = (sessions || []).reduce((sum, s) => sum + (s.message_count || 0), 0);
-                const totalTools = (sessions || []).reduce((sum, s) => sum + (s.tool_calls || 0), 0);
+                const totalMsg = (sessions||[]).reduce((s,x) => s + (x.message_count||0), 0);
+                const totalTool = (sessions||[]).reduce((s,x) => s + (x.tool_calls||0), 0);
                 statsEl.innerHTML =
-                    '<div class="stat-card"><h3>Sessions</h3><div class="value accent">' + (sessions ? sessions.length : 0) + '</div></div>' +
-                    '<div class="stat-card"><h3>Messages</h3><div class="value green">' + totalMsgs + '</div></div>' +
-                    '<div class="stat-card"><h3>Tool Calls</h3><div class="value yellow">' + totalTools + '</div></div>';
+                    '<div class="stat-item"><span class="stat-num blue">' + (sessions?sessions.length:0) + '</span><span class="stat-label">sessions</span></div>' +
+                    '<div class="stat-item"><span class="stat-num green">' + totalMsg + '</span><span class="stat-label">messages</span></div>' +
+                    '<div class="stat-item"><span class="stat-num dim">' + totalTool + '</span><span class="stat-label">tool calls</span></div>';
 
                 if (!sessions || sessions.length === 0) {
-                    list.innerHTML = '<div class="empty"><p>No sessions found for this project.</p></div>';
+                    grid.innerHTML = '<div class="empty-state"><p>No sessions</p></div>';
                     return;
                 }
 
-                list.innerHTML = sessions.map(s => {
-                    const dateStr = formatShortDate(s.start_time);
-                    const timeStr = formatTime(s.start_time);
-                    const sJson = JSON.stringify({id: s.id, title: s.title || s.id}).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                grid.innerHTML = sessions.map(s => {
+                    const sData = JSON.stringify({
+                        id: s.id, title: s.title || s.id,
+                        _projectName: project.name, _projectId: project.id
+                    }).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
-                    return '<div class="session-card" onclick=\'navigate("session", ' + sJson + ')\'>' +
+                    return '<div class="session-card" onclick=\'navigateTo("session", ' + sData + ')\'>' +
                         '<div class="session-title">' + esc(s.title || s.id || 'Untitled') + '</div>' +
                         '<div class="session-meta">' +
-                            '<span>' + agentDot(s.agent_type) + ' ' + esc(s.agent_type || '') + '</span>' +
-                            (dateStr ? '<span>📅 ' + dateStr + '</span>' : '') +
-                            (timeStr ? '<span>🕐 ' + timeStr + '</span>' : '') +
+                            '<span class="agent-pill">' + dot(s.agent_type) + ' ' + esc(s.agent_type||'') + '</span>' +
+                            (s.start_time ? '<span>' + fmtShort(s.start_time) + '</span>' : '') +
                         '</div>' +
-                        '<div class="session-bottom">' +
-                            '<span class="mini-stat"><strong>' + (s.message_count || 0) + '</strong> msgs</span>' +
-                            '<span class="mini-stat"><strong>' + (s.tool_calls || 0) + '</strong> tools</span>' +
+                        '<div class="session-stats">' +
+                            '<span><strong>' + (s.message_count||0) + '</strong> msgs</span>' +
+                            '<span><strong>' + (s.tool_calls||0) + '</strong> tools</span>' +
                         '</div>' +
                         '</div>';
                 }).join('');
             } catch(e) {
-                console.error('showProject:', e);
-                main.innerHTML = '<div class="empty"><p>Error loading sessions.</p></div>';
+                console.error(e);
+                el.innerHTML = '<div class="empty-state"><p>Failed to load sessions</p></div>';
             }
         }
 
-        // ── Session View (Messages) ──
-        async function showSession(main, sessionInfo) {
-            main.innerHTML = '<div class="view"><div class="loading"><div class="spinner"></div><p>Loading messages...</p></div></div>';
+        // ══════════════════════════════════════
+        // ── Session / Messages View ──
+        // ══════════════════════════════════════
+        async function renderSession(el, info) {
+            lastSessionInfo = info;
+            el.innerHTML = '<div class="view"><div class="loading-state"><div class="spinner"></div><p>Loading…</p></div></div>';
 
             try {
-                const res = await fetch(API + '/sessions/' + sessionInfo.id + '/messages');
-                let messages = await res.json();
+                const r = await fetch(API + '/sessions/' + info.id + '/messages');
+                let msgs = await r.json();
 
-                if (!messages || messages.length === 0) {
-                    main.innerHTML = '<div class="view"><div class="empty"><p>No messages in this session.</p></div></div>';
+                if (!msgs || msgs.length === 0) {
+                    el.innerHTML = '<div class="view"><div class="empty-state"><p>No messages</p></div></div>';
                     return;
                 }
 
-                const userN = messages.filter(m => m.role === 'user').length;
-                const assistN = messages.filter(m => m.role === 'assistant').length;
-                const toolN = messages.filter(m => m.role === 'tool').length;
+                const uN = msgs.filter(m=>m.role==='user').length;
+                const aN = msgs.filter(m=>m.role==='assistant').length;
+                const tN = msgs.filter(m=>m.role==='tool').length;
 
-                const statsHTML = '<div class="stats">' +
-                    '<div class="stat-card"><h3>Messages</h3><div class="value accent">' + messages.length + '</div></div>' +
-                    '<div class="stat-card"><h3>User</h3><div class="value">' + userN + '</div></div>' +
-                    '<div class="stat-card"><h3>Assistant</h3><div class="value green">' + assistN + '</div></div>' +
-                    '<div class="stat-card"><h3>Tool</h3><div class="value yellow">' + toolN + '</div></div>' +
+                const statsHTML = '<div class="stats-bar">' +
+                    '<div class="stat-item"><span class="stat-num blue">' + msgs.length + '</span><span class="stat-label">messages</span></div>' +
+                    '<div class="stat-item"><span class="stat-num">' + uN + '</span><span class="stat-label">user</span></div>' +
+                    '<div class="stat-item"><span class="stat-num green">' + aN + '</span><span class="stat-label">assistant</span></div>' +
+                    '<div class="stat-item"><span class="stat-num dim">' + tN + '</span><span class="stat-label">tool</span></div>' +
                     '</div>';
 
-                // Order toggle
-                const orderToggle = '<div class="msg-order-toggle">' +
-                    '<span class="label">Sort:</span>' +
-                    '<button onclick="setMsgOrder(\'desc\')" class="' + (messageOrder === 'desc' ? 'active' : '') + '">Newest first</button>' +
-                    '<button onclick="setMsgOrder(\'asc\')" class="' + (messageOrder === 'asc' ? 'active' : '') + '">Oldest first</button>' +
+                const sortHTML = '<div class="sort-bar">' +
+                    '<span>Sort:</span>' +
+                    '<button class="sort-btn ' + (messageOrder==='desc'?'on':'') + '" onclick="setOrder(\'desc\')">Newest</button>' +
+                    '<button class="sort-btn ' + (messageOrder==='asc'?'on':'') + '" onclick="setOrder(\'asc\')">Oldest</button>' +
                     '</div>';
 
-                // Apply order
-                if (messageOrder === 'desc') {
-                    messages = messages.slice().reverse();
-                }
+                if (messageOrder === 'desc') msgs = msgs.slice().reverse();
 
-                const msgsHTML = messages.map(m => {
-                    const ts = formatFullDate(m.created_at);
-                    const toolInfo = m.tool_name ? '<div class="msg-tool">🔧 ' + esc(m.tool_name) + '</div>' : '';
-                    const content = esc((m.content || '').substring(0, 4000));
+                const msgsHTML = msgs.map(m => {
+                    const ts = fmtDate(m.created_at);
+                    const toolTag = m.tool_name ? '<div class="msg-tool-name">⚡ ' + esc(m.tool_name) + '</div>' : '';
+                    const body = esc((m.content||'').substring(0, 4000));
 
-                    return '<div class="message ' + (m.role || '') + '">' +
-                        '<div class="msg-header"><span class="msg-role ' + (m.role || '') + '">' + (m.role || 'unknown') + '</span><span class="msg-time">' + ts + '</span></div>' +
-                        toolInfo +
-                        '<div class="msg-content">' + content + '</div>' +
+                    return '<div class="msg-item ' + (m.role||'') + '">' +
+                        '<div class="msg-head"><span class="msg-role-tag ' + (m.role||'') + '">' + (m.role||'?') + '</span><span class="msg-time">' + ts + '</span></div>' +
+                        toolTag +
+                        '<div class="msg-body">' + body + '</div>' +
                         '</div>';
                 }).join('');
 
-                main.innerHTML = '<div class="view">' + statsHTML + orderToggle + '<div class="messages-container">' + msgsHTML + '</div></div>';
+                el.innerHTML = '<div class="view">' + statsHTML + sortHTML + '<div class="messages-list">' + msgsHTML + '</div></div>';
             } catch(e) {
-                console.error('showSession:', e);
-                main.innerHTML = '<div class="view"><div class="empty"><p>Error loading messages.</p></div></div>';
+                console.error(e);
+                el.innerHTML = '<div class="view"><div class="empty-state"><p>Failed to load messages</p></div></div>';
             }
         }
 
-        // Message order toggle
-        let lastSessionInfo = null;
-        const origShowSession = showSession;
-        showSession = async function(main, sessionInfo) {
-            lastSessionInfo = sessionInfo;
-            return origShowSession(main, sessionInfo);
-        };
-        function setMsgOrder(order) {
-            messageOrder = order;
-            if (lastSessionInfo) {
-                showSession(document.getElementById('main-content'), lastSessionInfo);
-            }
+        function setOrder(o) {
+            messageOrder = o;
+            if (lastSessionInfo) renderSession(document.getElementById('main'), lastSessionInfo);
         }
 
+        // ══════════════════════════════════════
         // ── Search ──
-        async function search(query) {
-            if (!query || !query.trim()) return;
-            navigate('search', { query: query.trim() });
+        // ══════════════════════════════════════
+        function doSearch(q) {
+            if (!q || !q.trim()) return;
+            navigateTo('search', { query: q.trim() });
         }
 
-        async function showSearchResults(main, data) {
-            main.innerHTML = '<div class="view"><div class="loading"><div class="spinner"></div><p>Searching...</p></div></div>';
+        async function renderSearch(el, data) {
+            el.innerHTML = '<div class="view"><div class="loading-state"><div class="spinner"></div><p>Searching…</p></div></div>';
             try {
-                const res = await fetch(API + '/search?q=' + encodeURIComponent(data.query) + '&limit=100');
-                const messages = await res.json();
+                const r = await fetch(API + '/search?q=' + encodeURIComponent(data.query) + '&limit=100');
+                const msgs = await r.json();
 
-                if (!messages || messages.length === 0) {
-                    main.innerHTML = '<div class="view"><div class="empty"><p>No results for "' + esc(data.query) + '"</p></div></div>';
+                if (!msgs || msgs.length === 0) {
+                    el.innerHTML = '<div class="view"><div class="empty-state"><p>No results for "' + esc(data.query) + '"</p></div></div>';
                     return;
                 }
 
-                const resultsHTML = messages.map(m => {
-                    const preview = esc((m.content || '').substring(0, 300));
-                    const ts = formatShortDate(m.created_at);
-                    const sJson = JSON.stringify({id: m.session_id, title: m.session_id}).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                const items = msgs.map(m => {
+                    const preview = esc((m.content||'').substring(0, 250));
+                    const sData = JSON.stringify({id: m.session_id, title: m.session_id}).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
-                    return '<div class="search-result" onclick=\'navigate("session", ' + sJson + ')\'>' +
-                        '<div class="result-meta"><span class="msg-role ' + (m.role||'') + '" style="font-size:11px;font-weight:700">' + esc(m.role || '') + '</span><span>' + ts + '</span><span style="color:var(--accent);font-family:monospace;font-size:10px">' + esc((m.session_id || '').substring(0, 12)) + '…</span></div>' +
+                    return '<div class="result-item" onclick=\'navigateTo("session", ' + sData + ')\'>' +
+                        '<div class="result-meta">' +
+                            '<span class="msg-role-tag ' + (m.role||'') + '">' + esc(m.role||'') + '</span>' +
+                            '<span>' + fmtShort(m.created_at) + '</span>' +
+                        '</div>' +
                         '<div class="result-content">' + preview + '</div>' +
                         '</div>';
                 }).join('');
 
-                main.innerHTML = '<div class="view"><div class="section-title">' + messages.length + ' results for "' + esc(data.query) + '"</div><div class="search-results">' + resultsHTML + '</div></div>';
+                el.innerHTML = '<div class="view">' +
+                    '<div class="section-header"><div class="section-title">' + msgs.length + ' results</div></div>' +
+                    '<div class="results-list">' + items + '</div></div>';
             } catch(e) {
-                console.error('showSearchResults:', e);
-                main.innerHTML = '<div class="view"><div class="empty"><p>Search failed.</p></div></div>';
+                console.error(e);
+                el.innerHTML = '<div class="view"><div class="empty-state"><p>Search failed</p></div></div>';
             }
         }
 
         // ── Actions ──
-        async function scan() {
-            const main = document.getElementById('main-content');
-            main.innerHTML = '<div class="loading"><div class="spinner"></div><p>Scanning all IDEs for sessions...</p></div>';
+        async function doScan() {
+            const el = document.getElementById('main');
+            el.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Scanning…</p></div>';
             try {
                 await fetch(API + '/scan', { method: 'POST' });
-                navigate('home');
+                navigateTo('home');
             } catch(e) {
-                console.error('scan:', e);
-                main.innerHTML = '<div class="empty"><p>Scan failed. Check server logs.</p></div>';
+                console.error(e);
+                el.innerHTML = '<div class="empty-state"><p>Scan failed</p></div>';
             }
         }
 
@@ -492,11 +692,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, path })
             });
-            navigate('home');
+            navigateTo('home');
         }
 
         // ── Init ──
-        navigate('home');
+        navigateReplace('home');
     </script>
 </body>
 </html>
