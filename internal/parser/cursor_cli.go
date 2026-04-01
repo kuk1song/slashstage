@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/kuk1song/slashstage/internal/model"
 )
@@ -91,8 +90,8 @@ func (p *CursorCLIParser) Parse(path string) ([]model.ParseResult, error) {
 		Workspace:  workspace,
 		SourcePath: path,
 		SourceHash: hash,
-		StartedAt:  time.Now(),
-		LastActiveAt: time.Now(),
+		StartedAt:    GetFileModTime(path),
+		LastActiveAt: GetFileModTime(path),
 	}
 
 	var messages []model.Message

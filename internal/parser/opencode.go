@@ -160,5 +160,5 @@ func parseTimeStr(s string) time.Time {
 	if t, err := time.Parse("2006-01-02 15:04:05", s); err == nil {
 		return t
 	}
-	return time.Now()
+	return time.Time{}
 }

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/kuk1song/slashstage/internal/model"
 )
@@ -89,8 +88,8 @@ func (p *GeminiParser) Parse(path string) ([]model.ParseResult, error) {
 		Model:      session.Model,
 		SourcePath: path,
 		SourceHash: hash,
-		StartedAt:  time.Now(),
-		LastActiveAt: time.Now(),
+		StartedAt:    GetFileModTime(path),
+		LastActiveAt: GetFileModTime(path),
 	}
 
 	var messages []model.Message

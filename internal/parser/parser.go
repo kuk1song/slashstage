@@ -4,8 +4,11 @@
 package parser
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/kuk1song/slashstage/internal/model"
 )
@@ -67,7 +70,7 @@ var Registry = []model.AgentConfig{
 	{
 		Type:        model.AgentAntigravity,
 		DisplayName: "Antigravity",
-		DefaultDirs: []string{".gemini/antigravity"},
+		DefaultDirs: []string{".gemini/antigravity/conversations"},
 		Format:      "protobuf",
 	},
 	{
@@ -126,4 +129,61 @@ func DirExists(path string) bool {
 		return false
 	}
 	return info.IsDir()
+}
+
+// extractJSONContent tries to extract text content from a JSON content field.
+// Handles both string values and arrays of content blocks.
+func extractJSONContent(raw json.RawMessage) string {
+	if len(raw) == 0 {
+		return ""
+	}
+
+	// Try as string
+	var str string
+	if json.Unmarshal(raw, &str) == nil {
+		return str
+	}
+
+	// Try as array of content blocks
+	var blocks []struct {
+		Type string `json:"type"`
+		Text string `json:"text"`
+	}
+	if json.Unmarshal(raw, &blocks) == nil {
+		var parts []string
+		for _, b := range blocks {
+			if b.Text != "" {
+				parts = append(parts, b.Text)
+			}
+		}
+		return strings.Join(parts, "\n")
+	}
+
+	return ""
+}
+
+// GetFileModTime returns the modification time of a file, or a zero time.Time if an error occurs.
+// Used as a fallback for session timestamps when the source data doesn't contain timestamp info.
+func GetFileModTime(path string) time.Time {
+	info, err := os.Stat(path)
+	if err != nil {
+		return time.Time{} // Return zero time on error
+	}
+	return info.ModTime()
+}
+
+// normalizeLegacyRole converts various IDE role strings to standard MessageRole.
+func normalizeLegacyRole(role string) model.MessageRole {
+	switch strings.ToLower(role) {
+	case "user", "human":
+		return model.RoleUser
+	case "assistant", "ai", "bot":
+		return model.RoleAssistant
+	case "tool", "function", "tool_result":
+		return model.RoleTool
+	case "system", "developer":
+		return model.RoleSystem
+	default:
+		return model.RoleAssistant
+	}
 }

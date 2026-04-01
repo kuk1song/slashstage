@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/kuk1song/slashstage/internal/db"
+	"github.com/kuk1song/slashstage/internal/export"
 	"github.com/kuk1song/slashstage/internal/mcp"
 	"github.com/kuk1song/slashstage/internal/model"
 	"github.com/kuk1song/slashstage/internal/parser"
@@ -53,6 +54,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/projects/{id}/config", s.handleProjectConfig)
 	s.mux.HandleFunc("GET /api/sessions/{id}", s.handleGetSession)
 	s.mux.HandleFunc("GET /api/sessions/{id}/messages", s.handleSessionMessages)
+	s.mux.HandleFunc("GET /api/sessions/{id}/export/markdown", s.handleExportSessionMarkdown)
 	s.mux.HandleFunc("GET /api/sessions/unassigned", s.handleUnassignedSessions)
 	s.mux.HandleFunc("POST /api/scan", s.handleScan)
 	s.mux.HandleFunc("GET /api/search", s.handleSearch)
@@ -234,14 +236,26 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Auto-discover new projects if none exist
-	if len(projects) == 0 {
-		candidates := parser.DiscoverProjects(results)
-		for _, c := range candidates {
-			p, err := s.db.CreateProject(c.Name, c.Path, "", "")
-			if err == nil {
-				projects = append(projects, *p)
-			}
+	// Build a set of known project paths for fast lookup
+	knownPaths := make(map[string]bool)
+	for _, p := range projects {
+		knownPaths[p.Path] = true
+	}
+
+	// Discover new projects from sessions — always check for new workspaces,
+	// not just on first run. This ensures subsequent scans pick up new projects.
+	candidates := parser.DiscoverProjects(results)
+	newProjects := 0
+	for _, c := range candidates {
+		if knownPaths[c.Path] {
+			continue // Already exists
+		}
+		p, err := s.db.CreateProject(c.Name, c.Path, "", "")
+		if err == nil {
+			projects = append(projects, *p)
+			knownPaths[c.Path] = true
+			newProjects++
+			slog.Info("discovered new project", "name", c.Name, "path", c.Path)
 		}
 	}
 
@@ -269,12 +283,12 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		sessionCount++
 	}
 
-	slog.Info("scan complete", "sessions", sessionCount, "projects", len(projects))
+	slog.Info("scan complete", "sessions", sessionCount, "projects", len(projects), "new_projects", newProjects)
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"sessions_found":    sessionCount,
-		"projects_found":    len(projects),
-		"new_projects":      len(projects),
+		"sessions_found": sessionCount,
+		"projects_found": len(projects),
+		"new_projects":   newProjects,
 	})
 }
 
@@ -324,6 +338,27 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		"total_sessions":      totalSessions,
 		"unassigned_sessions": len(unassigned),
 	})
+}
+
+func (s *Server) handleExportSessionMarkdown(w http.ResponseWriter, r *http.Request) {
+	sessionID := r.PathValue("id")
+	session, err := s.db.GetSession(sessionID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "session not found")
+		return
+	}
+	messages, err := s.db.GetMessages(sessionID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	markdown := export.ToMarkdown(*session, messages)
+
+	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"session-%s.md\"", sessionID))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(markdown))
 }
 
 func (s *Server) handleFrontend(w http.ResponseWriter, r *http.Request) {

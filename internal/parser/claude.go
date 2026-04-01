@@ -95,8 +95,8 @@ func (p *ClaudeParser) Parse(path string) ([]model.ParseResult, error) {
 		Workspace:  workspace,
 		SourcePath: path,
 		SourceHash: hash,
-		StartedAt:  time.Now(),
-		LastActiveAt: time.Now(),
+		StartedAt:    GetFileModTime(path),
+		LastActiveAt: GetFileModTime(path),
 	}
 
 	var messages []model.Message
@@ -250,7 +250,7 @@ func normalizeClaudeRole(role, msgType string) model.MessageRole {
 
 func parseClaudeTimestamp(raw json.RawMessage) time.Time {
 	if len(raw) == 0 {
-		return time.Now()
+		return time.Time{}
 	}
 
 	// Try as string (ISO 8601)
@@ -270,5 +270,5 @@ func parseClaudeTimestamp(raw json.RawMessage) time.Time {
 		return time.UnixMilli(int64(ms))
 	}
 
-	return time.Now()
+	return time.Time{}
 }

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/kuk1song/slashstage/internal/model"
 )
@@ -87,8 +86,8 @@ func (p *CopilotParser) Parse(path string) ([]model.ParseResult, error) {
 		Workspace:  session.Workspace,
 		SourcePath: path,
 		SourceHash: hash,
-		StartedAt:  time.Now(),
-		LastActiveAt: time.Now(),
+		StartedAt:    GetFileModTime(path),
+		LastActiveAt: GetFileModTime(path),
 	}
 
 	var messages []model.Message
