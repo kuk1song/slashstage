@@ -2,7 +2,7 @@ module github.com/kuk1song/slashstage
 
 go 1.26.1
 
-require modernc.org/sqlite v1.47.0
+require modernc.org/sqlite v1.48.2
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
